@@ -28,6 +28,7 @@ public class Medico extends Persona {
     private Departamento departamento;
 
     @OneToMany (mappedBy = "medico", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Cita> citas = new ArrayList<>();
 
 

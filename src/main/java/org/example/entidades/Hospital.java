@@ -36,9 +36,11 @@ public class Hospital {
 
 
     @OneToMany(mappedBy = "hospital", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Departamento> departamentos = new ArrayList<>();
 
     @OneToMany(mappedBy = "hospital", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Paciente> pacientes = new ArrayList<>();
 
     public void agregarDepartamento(Departamento d) {

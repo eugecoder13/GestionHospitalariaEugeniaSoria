@@ -1,6 +1,7 @@
 package org.example.entidades;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -35,6 +36,7 @@ public class Paciente extends Persona {
     @OneToMany(mappedBy = "paciente",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
+    @Builder.Default
     private List<Cita> citas = new ArrayList<>();
 
     /** Dueño de la FK hacia Hospital */

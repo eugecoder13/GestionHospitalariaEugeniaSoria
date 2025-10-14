@@ -30,6 +30,7 @@ public class Sala {
 
 
     @OneToMany (mappedBy = "sala", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Cita> citas = new ArrayList<>();
 
 
