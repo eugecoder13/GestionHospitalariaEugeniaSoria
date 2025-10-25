@@ -1,9 +1,7 @@
 package org.example.entidades;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
@@ -14,8 +12,9 @@ import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @Getter
+@Setter // Añadimos setter para hospital (setHospital) y otras propiedades.
 @SuperBuilder(toBuilder = true)
-@NoArgsConstructor(access = PROTECTED) // requerido por JPA
+@NoArgsConstructor(access = PROTECTED)
 public class Paciente extends Persona {
 
     @Id
@@ -30,49 +29,52 @@ public class Paciente extends Persona {
             cascade = CascadeType.ALL,
             orphanRemoval = true,
             fetch = FetchType.LAZY)
-    private HistoriaClinica historiaClinica;
+    private HistoriaClinica historiaClinica; // Se inicializa en el constructor.
 
     /** Citas del paciente */
     @OneToMany(mappedBy = "paciente",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    @Builder.Default
-    private List<Cita> citas = new ArrayList<>();
+    private List<Cita> citas; // Inicialización manual.
 
     /** Dueño de la FK hacia Hospital */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "hospital_id", nullable = false)
     private Hospital hospital;
 
-    /** === Ctor protegido “de negocio” que crea la HC automáticamente === */
-    protected Paciente(Hospital hospital) {
-        this.hospital = Objects.requireNonNull(hospital);
+    // === CONSTRUCTOR CRÍTICO DE LOMBOK QUE MANEJA EL BUILDER Y LA HC ===
+    protected Paciente(PacienteBuilder<?, ?> builder) {
+        super(builder);
+        // Asignación de campos del builder
+        this.direccion = builder.direccion;
+        this.telefono = builder.telefono;
+        this.hospital = builder.hospital;
+
+        // Inicialización de colecciones y HC (CRÍTICO)
+        this.citas = new ArrayList<>();
         asegurarHistoriaClinica();
     }
 
-    /** Red de seguridad: si alguien construye sin HC, se crea antes de persistir */
-    @PrePersist
-    private void prePersist() {
-        asegurarHistoriaClinica();
-    }
+    // Se elimina el constructor protected Paciente(Hospital hospital) ya que choca con SuperBuilder.
+
 
     /** Crea la HC si falta (sin exponer setter público) */
     void asegurarHistoriaClinica() {
         if (this.historiaClinica == null) {
-            this.historiaClinica = new HistoriaClinica(this); // lado dueño está en HistoriaClinica
+            // El builder de HC debe tomar el Paciente.
+            this.historiaClinica = HistoriaClinica.builder().paciente(this).build();
         }
     }
 
     /* ===== Helpers para mantener bidireccionalidad ===== */
-
-    // Visibilidad de paquete: lo usa Hospital.agregarPaciente(...)
-    void setHospital(Hospital h) { this.hospital = h; }
+    void setHospital(Hospital h) { this.hospital = h; } // Usado por Hospital.agregarPaciente
 
     public void addCita(Cita c) {
         if (c == null) return;
+        if (this.citas == null) this.citas = new ArrayList<>(); // Red de seguridad
         if (!citas.contains(c)) {
             citas.add(c);
-            c.setPaciente(this); // lado dueño de la relación Cita↔Paciente
+            c.setPaciente(this);
         }
     }
 

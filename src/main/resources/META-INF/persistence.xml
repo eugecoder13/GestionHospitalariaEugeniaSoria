@@ -6,7 +6,14 @@
 
     <persistence-unit name="hospital-persistence-unit" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-
+        <class>org.example.entidades.Persona</class>
+        <class>org.example.entidades.Hospital</class>
+        <class>org.example.entidades.Departamento</class>
+        <class>org.example.entidades.Sala</class>
+        <class>org.example.entidades.Medico</class>
+        <class>org.example.entidades.Paciente</class>
+        <class>org.example.entidades.HistoriaClinica</class>
+        <class>org.example.entidades.Cita</class>
         <!-- Si querés listar explícitamente entidades, podés agregar <class>org.example.entidades.Medico</class> etc. -->
         <!-- Con Hibernate + scanning del classpath no es obligatorio si están en el jar. -->
 

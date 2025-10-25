@@ -26,17 +26,17 @@ public class Main {
             // ===== 2) Departamentos =====
             Departamento cardio = Departamento.builder()
                     .nombre("Cardiología")
-                    .especialidad(EspecialidadMedica.CARDIOLOGIA.name())
+                    .especialidad(EspecialidadMedica.CARDIOLOGIA)
                     .build();
 
             Departamento pedia = Departamento.builder()
                     .nombre("Pediatría")
-                    .especialidad(EspecialidadMedica.PEDIATRIA.name())
+                    .especialidad(EspecialidadMedica.PEDIATRIA)
                     .build();
 
             Departamento trauma = Departamento.builder()
                     .nombre("Traumatología")
-                    .especialidad(EspecialidadMedica.TRAUMATOLOGIA.name())
+                    .especialidad(EspecialidadMedica.TRAUMATOLOGIA)
                     .build();
 
             hospital.agregarDepartamento(cardio);
@@ -141,6 +141,26 @@ public class Main {
             em.persist(c3);
 
             em.getTransaction().commit();
+
+            try {
+                // Inicias una nueva transacción para la operación de escritura (UPDATE)
+                em.getTransaction().begin();
+
+                // 1. Modificas el estado de la cita c1
+                c1.setEstado(EstadoCita.COMPLETADA);
+
+                // 2. Usas em.merge() para persistir el cambio en la base de datos
+                em.merge(c1);
+
+                em.getTransaction().commit(); // Confirma la transacción de actualización
+                System.out.println("ACTUALIZACIÓN: Cita " + c1.getId() + " marcada como COMPLETA.");
+
+            } catch (Exception e) {
+                if (em.getTransaction().isActive()) em.getTransaction().rollback();
+                System.err.println("Error durante la actualización: " + e.getMessage());
+                // Es crucial lanzar la excepción si el rollback ocurre, o el flujo normal
+                // de tu `try-catch-finally` principal se hará cargo.
+            }
 
             // ===== 8) Consultas JPQL (TypedQuery) =====
             // 8.1 SELECT hospitales
